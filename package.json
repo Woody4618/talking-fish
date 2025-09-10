@@ -1,0 +1,15 @@
+{
+  "name": "talking-fish",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "listener": "node scripts/listener.js",
+    "send:memo": "node scripts/send_memo.js"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.3",
+    "dotenv": "^16.4.5",
+    "execa": "^8.0.1"
+  }
+}
