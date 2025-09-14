@@ -4,6 +4,12 @@ A Big Mouth Belly Bass Fish that listens to memos on the solana blockchain and s
 Will be great for workshops. First person that manages to send a memo to the fish wins a prize.
 Or for live streams, where people can ask questions and the fish will blare them in from behind. :D
 
+<img width="719" height="394" alt="fish" src="https://github.com/user-attachments/assets/ef77667b-27d4-4d66-aa2d-a9decc980cad" />
+
+Video of the Fish in action: 
+
+https://x.com/SolPlay_jonas/status/1966846254207426760
+
 Quickstart (macOS)
 
 ```bash
