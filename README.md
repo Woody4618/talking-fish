@@ -31,19 +31,6 @@ http://localhost:3000/memo
 You can deploy it to vercel for example.
 Note: gTTS uses an online service. An internet connection is required.
 
-## Install
-
-```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-or
-
-```bash
-python3 -m pip install --user -r requirements.txt
-```
-
 ## Install on Raspberry Pi
 
 ### MAX98357A
