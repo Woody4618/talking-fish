@@ -140,6 +140,15 @@ Then i unsoldered the the button cables and attached it to a relay that is contr
 My fish does not have seperate motors for mouth and tail movement sadly but instead two different fixed sequences. So what i did it i just press the button via the relay and then measure the mp3 length and press the button again when the text is over to stop the movement.
 If your Fish has a seperate mouth motor you can actually sync the movement with the audio, which would be cool.
 
+Then on the raspberry you just start the listener script like you would on your computer: 
+
+```bash
+node scripts/listener.js
+```
+
+Or you start it as a service and put it in autostart. 
+
+
 ## Manual Usage
 
 - Convert a message directly:
