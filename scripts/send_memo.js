@@ -17,7 +17,7 @@ import {
 } from "@solana/web3.js";
 
 const DEST = process.env.DEST || "GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd";
-const MEMO = process.env.MEMO || "There is a new question: Wen 1000 dollar sol? ";
+const MEMO = process.env.MEMO || "Hello from talking Memo the solana reading fish ";
 const HTTP_ENDPOINT =
   process.env.SOLANA_HTTP || "https://api.devnet.solana.com";
 

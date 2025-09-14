@@ -6,7 +6,7 @@ import sys
 from typing import Optional
 
 
-def save_text_to_mp3(text: str, output_path: str, language_code: str = "en", use_slow_speed: bool = False) -> str:
+def save_text_to_mp3(text: str, output_path: str, language_code: str = "en", use_slow_speed: bool = False, tld: Optional[str] = None) -> str:
 	"""Convert text to speech and save as an MP3 file.
 
 	Args:
@@ -14,6 +14,7 @@ def save_text_to_mp3(text: str, output_path: str, language_code: str = "en", use
 		output_path: Desired output path. ".mp3" will be appended if missing.
 		language_code: gTTS language code (e.g., "en", "es", "fr").
 		use_slow_speed: If True, use a slower speech rate.
+		tld: Optional top-level domain used by gTTS (e.g., "co.uk", "com.au") to vary accent.
 
 	Returns:
 		The absolute output path where the MP3 was written.
@@ -35,7 +36,10 @@ def save_text_to_mp3(text: str, output_path: str, language_code: str = "en", use
 	# Lazy import so the module is only needed when actually used
 	from gtts import gTTS
 
-	tts = gTTS(text=clean_text, lang=language_code, slow=use_slow_speed)
+	kwargs = {"text": clean_text, "lang": language_code, "slow": use_slow_speed}
+	if tld:
+		kwargs["tld"] = tld
+	tts = gTTS(**kwargs)
 	tts.save(resolved_output)
 
 	return os.path.abspath(resolved_output)
@@ -58,6 +62,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 	parser.add_argument("-o", "--output", type=str, default="output.mp3", help="Output MP3 file path (default: output.mp3)")
 	parser.add_argument("-l", "--lang", type=str, default="en", help="Language code (default: en)")
 	parser.add_argument("--slow", action="store_true", help="Speak slowly")
+	parser.add_argument("--tld", type=str, default=os.environ.get("TTS_TLD", ""), help="Accent via TLD (e.g., co.uk, com.au). Also reads TTS_TLD env var.")
 
 	args = parser.parse_args(argv)
 
@@ -87,7 +92,13 @@ def main(argv: Optional[list[str]] = None) -> int:
 		return 2
 
 	try:
-		written_path = save_text_to_mp3(text=text, output_path=args.output, language_code=args.lang, use_slow_speed=args.slow)
+		written_path = save_text_to_mp3(
+			text=text,
+			output_path=args.output,
+			language_code=args.lang,
+			use_slow_speed=args.slow,
+			tld=(args.tld or None),
+		)
 		print(f"Wrote MP3 to {written_path}")
 		return 0
 	except Exception as e:
