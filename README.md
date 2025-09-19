@@ -4,6 +4,12 @@ A Big Mouth Belly Bass Fish that listens to memos on the solana blockchain and s
 Will be great for workshops. First person that manages to send a memo to the fish wins a prize.
 Or for live streams, where people can ask questions and the fish will blare them in from behind. :D
 
+<img width="719" height="394" alt="fish" src="https://github.com/user-attachments/assets/ef77667b-27d4-4d66-aa2d-a9decc980cad" />
+
+Video of the Fish in action: 
+
+https://x.com/SolPlay_jonas/status/1966846254207426760
+
 Quickstart (macOS)
 
 ```bash
@@ -24,19 +30,6 @@ http://localhost:3000/memo
 
 You can deploy it to vercel for example.
 Note: gTTS uses an online service. An internet connection is required.
-
-## Install
-
-```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-or
-
-```bash
-python3 -m pip install --user -r requirements.txt
-```
 
 ## Install on Raspberry Pi
 
@@ -146,6 +139,15 @@ MAX98357A to the speaker of the fish. Its also a 3W and 5Ohm speaker i think so 
 Then i unsoldered the the button cables and attached it to a relay that is controlled via the GPIO 17 pin of the raspberry pi.
 My fish does not have seperate motors for mouth and tail movement sadly but instead two different fixed sequences. So what i did it i just press the button via the relay and then measure the mp3 length and press the button again when the text is over to stop the movement.
 If your Fish has a seperate mouth motor you can actually sync the movement with the audio, which would be cool.
+
+Then on the raspberry you just start the listener script like you would on your computer: 
+
+```bash
+node scripts/listener.js
+```
+
+Or you start it as a service and put it in autostart. 
+
 
 ## Manual Usage
 
