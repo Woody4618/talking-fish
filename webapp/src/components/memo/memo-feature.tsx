@@ -73,7 +73,7 @@ export default function MemoFeature() {
                 <Image src="/fish.png" alt="Talking Fish" width={340} height={340} className="rounded-xl" />
               </div>
               <div>
-                <div className="text-2xl font-semibold">Tip the Talking Fish</div>
+                <div className="text-2xl font-semibold">Talking Memo</div>
                 <div className="text-muted-foreground">Send a memo with your tip and make the fish talk.</div>
               </div>
             </div>
