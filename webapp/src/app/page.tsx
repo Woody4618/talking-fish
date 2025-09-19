@@ -1,5 +1,5 @@
-import { DashboardFeature } from '@/components/dashboard/dashboard-feature'
+import MemoFeature from '@/components/memo/memo-feature'
 
 export default function Home() {
-  return <DashboardFeature />
+  return <MemoFeature />
 }
