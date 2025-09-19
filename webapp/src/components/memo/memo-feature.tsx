@@ -12,7 +12,7 @@ import Image from 'next/image'
 import { WalletButton } from '@/components/solana/solana-provider'
 
 const DEFAULT_ADDRESS_1 = 'GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd'
-const DEFAULT_ADDRESS_2 = 'GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd'
+const DEFAULT_ADDRESS_2 = 'F9pc5RznvM93ysWmCDoxsdam8sLQgNh1wA2wQbQvyUm5'
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr')
 
 export default function MemoFeature() {
