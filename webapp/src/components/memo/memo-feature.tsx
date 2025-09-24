@@ -13,6 +13,7 @@ import { WalletButton } from '@/components/solana/solana-provider'
 
 const DEFAULT_ADDRESS_1 = 'GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd'
 const DEFAULT_ADDRESS_2 = 'F9pc5RznvM93ysWmCDoxsdam8sLQgNh1wA2wQbQvyUm5'
+const DEFAULT_ADDRESS_3 = 'F7axbiAw38boa4ZpqS46Qos8yF4fmHp21BLZfPhJF3DK'
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr')
 
 export default function MemoFeature() {
@@ -22,12 +23,15 @@ export default function MemoFeature() {
   const [amountSol1, setAmountSol1] = useState('0.001')
   const [address2, setAddress2] = useState(DEFAULT_ADDRESS_2)
   const [amountSol2, setAmountSol2] = useState('0.001')
+  const [address3, setAddress3] = useState(DEFAULT_ADDRESS_3)
+  const [amountSol3, setAmountSol3] = useState('0.001')
   const [memo, setMemo] = useState('Hello fish!')
   const [sending, setSending] = useState(false)
   const transactionToast = useTransactionToast()
 
   const pubkey1 = useMemo(() => new PublicKey(address1), [address1])
   const pubkey2 = useMemo(() => new PublicKey(address2), [address2])
+  const pubkey3 = useMemo(() => new PublicKey(address3), [address3])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -37,11 +41,14 @@ export default function MemoFeature() {
       setSending(true)
       const lamports1 = Math.floor(parseFloat(amountSol1 || '0') * LAMPORTS_PER_SOL)
       const lamports2 = Math.floor(parseFloat(amountSol2 || '0') * LAMPORTS_PER_SOL)
+      const lamports3 = Math.floor(parseFloat(amountSol3 || '0') * LAMPORTS_PER_SOL)
       if (!Number.isFinite(lamports1) || lamports1 <= 0) throw new Error('Enter a valid SOL amount for recipient 1')
       if (!Number.isFinite(lamports2) || lamports2 <= 0) throw new Error('Enter a valid SOL amount for recipient 2')
+      if (!Number.isFinite(lamports3) || lamports3 <= 0) throw new Error('Enter a valid SOL amount for recipient 3')
 
       const ix1 = SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: pubkey1, lamports: lamports1 })
       const ix2 = SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: pubkey2, lamports: lamports2 })
+      const ix3 = SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: pubkey3, lamports: lamports3 })
       const ixMemo = new TransactionInstruction({
         keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
         programId: MEMO_PROGRAM_ID,
@@ -49,7 +56,7 @@ export default function MemoFeature() {
       })
 
       const latest = await connection.getLatestBlockhash('confirmed')
-      const tx = new Transaction({ feePayer: publicKey, ...latest }).add(ix1, ix2, ixMemo)
+      const tx = new Transaction({ feePayer: publicKey, ...latest }).add(ix1, ix2, ix3, ixMemo)
       const signed = await signTransaction(tx)
       const sig = await connection.sendRawTransaction(signed.serialize())
       await connection.confirmTransaction({ signature: sig, ...latest }, 'confirmed')
@@ -65,7 +72,7 @@ export default function MemoFeature() {
     <div className="container mx-auto px-4">
       <Card>
         <CardHeader>
-          <CardTitle>Send SOL with a memo to two recipients</CardTitle>
+          <CardTitle>Send SOL with a memo to three recipients</CardTitle>
           <CardDescription>
             Destination addresses:
             <span className="ml-2 font-mono inline-block">
@@ -73,6 +80,9 @@ export default function MemoFeature() {
             </span>
             <span className="ml-2 font-mono inline-block">
               <ExplorerLink path={`address/${address2}`} label={address2} />
+            </span>
+            <span className="ml-2 font-mono inline-block">
+              <ExplorerLink path={`address/${address3}`} label={address3} />
             </span>
           </CardDescription>
         </CardHeader>
@@ -85,7 +95,7 @@ export default function MemoFeature() {
               </div>
               <div>
                 <div className="text-2xl font-semibold">Talking Memo</div>
-                <div className="text-muted-foreground">Send a memo with your tip to two wallets.</div>
+                <div className="text-muted-foreground">Send a memo with your tip to three wallets.</div>
               </div>
             </div>
           </div>
@@ -123,6 +133,22 @@ export default function MemoFeature() {
                 min="0"
                 value={amountSol2}
                 onChange={(e) => setAmountSol2(e.target.value)}
+                placeholder="0.001"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2">
+              <span>Recipient 3 Address</span>
+              <Input value={address3} onChange={(e) => setAddress3(e.target.value)} placeholder={DEFAULT_ADDRESS_3} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span>Amount 3 (SOL)</span>
+              <Input
+                type="number"
+                step="0.001"
+                min="0"
+                value={amountSol3}
+                onChange={(e) => setAmountSol3(e.target.value)}
                 placeholder="0.001"
               />
             </label>
