@@ -4,6 +4,7 @@ import {
   PublicKey,
   SystemProgram,
   Transaction,
+  TransactionInstruction,
   clusterApiUrl,
   LAMPORTS_PER_SOL,
 } from '@solana/web3.js'
@@ -63,8 +64,9 @@ export async function POST(req: NextRequest) {
     const account = typeof body.account === 'string' ? (body.account as string) : undefined
     const a1 = searchParams.get('a1')
     const s1 = parseFloat(searchParams.get('s1') || '0')
+    const memoText = searchParams.get('m') || ''
 
-    console.log('[SolanaPay][POST]', { account, a1, s1 })
+    console.log('[SolanaPay][POST]', { account, a1, s1, memoText })
 
     if (!account) return json({ transaction: '', message: '', error: 'Missing account in body' }, 400)
     if (!a1 || s1 <= 0) return json({ transaction: '', message: '', error: 'No valid recipient' }, 400)
@@ -78,6 +80,15 @@ export async function POST(req: NextRequest) {
 
     const tx = new Transaction({ feePayer, blockhash, lastValidBlockHeight })
     tx.add(SystemProgram.transfer({ fromPubkey: feePayer, toPubkey: new PublicKey(a1), lamports }))
+    if (memoText) {
+      tx.add(
+        new TransactionInstruction({
+          keys: [{ pubkey: feePayer, isSigner: true, isWritable: true }],
+          programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+          data: Buffer.from(memoText, 'utf8'),
+        }),
+      )
+    }
 
     const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false })
     const transaction = Buffer.from(serialized).toString('base64')
