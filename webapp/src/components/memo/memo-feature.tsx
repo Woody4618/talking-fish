@@ -1,7 +1,7 @@
 'use client'
 
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -10,28 +10,30 @@ import { useTransactionToast } from '@/components/use-transaction-toast'
 import { ExplorerLink } from '@/components/cluster/cluster-ui'
 import Image from 'next/image'
 import { WalletButton } from '@/components/solana/solana-provider'
+import QRCode from 'react-qr-code'
 
-const DEFAULT_ADDRESS_1 = 'GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd'
-const DEFAULT_ADDRESS_2 = 'F9pc5RznvM93ysWmCDoxsdam8sLQgNh1wA2wQbQvyUm5'
-const DEFAULT_ADDRESS_3 = 'F7axbiAw38boa4ZpqS46Qos8yF4fmHp21BLZfPhJF3DK'
-const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr')
+const DEFAULT_ADDRESS = 'GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd'
 
 export default function MemoFeature() {
   const { connection } = useConnection()
   const { publicKey, signTransaction } = useWallet()
-  const [address1, setAddress1] = useState(DEFAULT_ADDRESS_1)
-  const [amountSol1, setAmountSol1] = useState('0.001')
-  const [address2, setAddress2] = useState(DEFAULT_ADDRESS_2)
-  const [amountSol2, setAmountSol2] = useState('0.001')
-  const [address3, setAddress3] = useState(DEFAULT_ADDRESS_3)
-  const [amountSol3, setAmountSol3] = useState('0.001')
-  const [memo, setMemo] = useState('Hello fish!')
+  const [address, setAddress] = useState(DEFAULT_ADDRESS)
+  const [amountSol, setAmountSol] = useState('0.001')
   const [sending, setSending] = useState(false)
   const transactionToast = useTransactionToast()
 
-  const pubkey1 = useMemo(() => new PublicKey(address1), [address1])
-  const pubkey2 = useMemo(() => new PublicKey(address2), [address2])
-  const pubkey3 = useMemo(() => new PublicKey(address3), [address3])
+  const pubkey = useMemo(() => new PublicKey(address), [address])
+
+  const solanaPayUrl = useMemo(() => {
+    if (typeof window === 'undefined') return ''
+    const url = new URL('/api/solana-pay', window.location.origin)
+    const amt = parseFloat(amountSol || '0')
+    if (address && amt > 0) {
+      url.searchParams.set('a1', address)
+      url.searchParams.set('s1', String(amt))
+    }
+    return url.toString()
+  }, [address, amountSol])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -39,24 +41,13 @@ export default function MemoFeature() {
 
     try {
       setSending(true)
-      const lamports1 = Math.floor(parseFloat(amountSol1 || '0') * LAMPORTS_PER_SOL)
-      const lamports2 = Math.floor(parseFloat(amountSol2 || '0') * LAMPORTS_PER_SOL)
-      const lamports3 = Math.floor(parseFloat(amountSol3 || '0') * LAMPORTS_PER_SOL)
-      if (!Number.isFinite(lamports1) || lamports1 <= 0) throw new Error('Enter a valid SOL amount for recipient 1')
-      if (!Number.isFinite(lamports2) || lamports2 <= 0) throw new Error('Enter a valid SOL amount for recipient 2')
-      if (!Number.isFinite(lamports3) || lamports3 <= 0) throw new Error('Enter a valid SOL amount for recipient 3')
+      const lamports = Math.floor(parseFloat(amountSol || '0') * LAMPORTS_PER_SOL)
+      if (!Number.isFinite(lamports) || lamports <= 0) throw new Error('Enter a valid SOL amount')
 
-      const ix1 = SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: pubkey1, lamports: lamports1 })
-      const ix2 = SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: pubkey2, lamports: lamports2 })
-      const ix3 = SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: pubkey3, lamports: lamports3 })
-      const ixMemo = new TransactionInstruction({
-        keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
-        programId: MEMO_PROGRAM_ID,
-        data: Buffer.from(memo ?? '', 'utf8'),
-      })
+      const ix = SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: pubkey, lamports })
 
       const latest = await connection.getLatestBlockhash('confirmed')
-      const tx = new Transaction({ feePayer: publicKey, ...latest }).add(ix1, ix2, ix3, ixMemo)
+      const tx = new Transaction({ feePayer: publicKey, ...latest }).add(ix)
       const signed = await signTransaction(tx)
       const sig = await connection.sendRawTransaction(signed.serialize())
       await connection.confirmTransaction({ signature: sig, ...latest }, 'confirmed')
@@ -72,17 +63,11 @@ export default function MemoFeature() {
     <div className="container mx-auto px-4">
       <Card>
         <CardHeader>
-          <CardTitle>Send SOL with a memo to three recipients</CardTitle>
+          <CardTitle>Send SOL</CardTitle>
           <CardDescription>
-            Destination addresses:
+            Destination address:
             <span className="ml-2 font-mono inline-block">
-              <ExplorerLink path={`address/${address1}`} label={address1} />
-            </span>
-            <span className="ml-2 font-mono inline-block">
-              <ExplorerLink path={`address/${address2}`} label={address2} />
-            </span>
-            <span className="ml-2 font-mono inline-block">
-              <ExplorerLink path={`address/${address3}`} label={address3} />
+              <ExplorerLink path={`address/${address}`} label={address} />
             </span>
           </CardDescription>
         </CardHeader>
@@ -94,8 +79,8 @@ export default function MemoFeature() {
                 <Image src="/fish.png" alt="Talking Fish" width={340} height={340} className="rounded-xl" />
               </div>
               <div>
-                <div className="text-2xl font-semibold">Talking Memo</div>
-                <div className="text-muted-foreground">Send a memo with your tip to three wallets.</div>
+                <div className="text-2xl font-semibold">Talking Fish</div>
+                <div className="text-muted-foreground">Send a tip to the printer wallet.</div>
               </div>
             </div>
           </div>
@@ -105,70 +90,42 @@ export default function MemoFeature() {
           </div>
 
           <form className="flex flex-col gap-4 max-w-md mx-auto items-stretch text-center" onSubmit={onSubmit}>
-            <label className="flex flex-col gap-2">
-              <span>Recipient 1 Address</span>
-              <Input value={address1} onChange={(e) => setAddress1(e.target.value)} placeholder={DEFAULT_ADDRESS_1} />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span>Amount 1 (SOL)</span>
-              <Input
-                type="number"
-                step="0.001"
-                min="0"
-                value={amountSol1}
-                onChange={(e) => setAmountSol1(e.target.value)}
-                placeholder="0.001"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2">
-              <span>Recipient 2 Address</span>
-              <Input value={address2} onChange={(e) => setAddress2(e.target.value)} placeholder={DEFAULT_ADDRESS_2} />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span>Amount 2 (SOL)</span>
-              <Input
-                type="number"
-                step="0.001"
-                min="0"
-                value={amountSol2}
-                onChange={(e) => setAmountSol2(e.target.value)}
-                placeholder="0.001"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2">
-              <span>Recipient 3 Address</span>
-              <Input value={address3} onChange={(e) => setAddress3(e.target.value)} placeholder={DEFAULT_ADDRESS_3} />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span>Amount 3 (SOL)</span>
-              <Input
-                type="number"
-                step="0.001"
-                min="0"
-                value={amountSol3}
-                onChange={(e) => setAmountSol3(e.target.value)}
-                placeholder="0.001"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2">
-              <span>Memo</span>
-              <Input
-                type="text"
-                maxLength={200}
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="Write a memo..."
-              />
-            </label>
             <div className="flex justify-center">
               <Button type="submit" disabled={!publicKey || sending}>
-                {sending ? 'Sending...' : 'Send SOL with Memo'}
+                {sending ? 'Sending...' : 'Send SOL'}
               </Button>
             </div>
           </form>
+
+          {solanaPayUrl && (
+            <div className="mt-8 flex flex-col items-center gap-2">
+              <div className="text-sm text-muted-foreground">Or scan with a mobile wallet (Solana Pay)</div>
+              <div className="bg-white p-2 rounded-md">
+                <QRCode value={solanaPayUrl} size={240} />
+              </div>
+              <a href={solanaPayUrl} className="text-xs break-all underline" target="_blank" rel="noreferrer">
+                {solanaPayUrl}
+              </a>
+            </div>
+          )}
+
+          <div className="mt-10 max-w-md mx-auto">
+            <label className="flex flex-col gap-2">
+              <span>Printer Address</span>
+              <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={DEFAULT_ADDRESS} />
+            </label>
+            <label className="flex flex-col gap-2 mt-2">
+              <span>Amount (SOL)</span>
+              <Input
+                type="number"
+                step="0.001"
+                min="0"
+                value={amountSol}
+                onChange={(e) => setAmountSol(e.target.value)}
+                placeholder="0.001"
+              />
+            </label>
+          </div>
         </CardContent>
       </Card>
     </div>
