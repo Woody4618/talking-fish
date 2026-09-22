@@ -23,9 +23,10 @@ npm run send:memo
 You can also use the web app to send memos:
 
 ```bash
-cd anchorCounter/counter
+cd webapp
+npm install
 npm run dev
-http://localhost:3000/memo
+# then open http://localhost:3000/memo
 ```
 
 You can deploy it to vercel for example.
@@ -47,13 +48,24 @@ I used rsync but you can also use scp or just copy the files manually.
 rsync -azP --delete \
   --exclude '.git' \
   --exclude '.venv' \
-  --exclude '**/node_modules' \
-  --exclude '**/.next' \
-  --exclude '**/target' \
-  --exclude '**/dist' \
+  --exclude 'node_modules' \
+  --exclude '.next' \
+  --exclude 'target' \
+  --exclude 'dist' \
   /Users/jonasmac2/Documents/GitHub/talking-fish/ \
   pi@raspberrypi.local:Documents/talking-fish/
 ```
+
+rsync -azP --delete \
+  --exclude '.git' \
+  --exclude '.venv' \
+  --exclude '.env' \
+  --exclude 'node_modules' \
+  --exclude '.next' \
+  --exclude 'target' \
+  --exclude 'dist' \
+  /Users/jonasmac2/Documents/GitHub/talking-fish/ \
+  bar@bar10.local:Documents/
 
 Replace pi@raspberrypi.local with your raspberry pi ip address or network name.
 
@@ -196,6 +208,11 @@ Optional/debug:
 - `AUDIO_DEVICE` ALSA device (e.g., `plughw:0,0`)
 - `AUDIO_RATE` playback rate for `mpg123` (e.g., `48000`)
 - `AUDIO_FORCE_WAV=1` convert MP3→WAV at 48k (ffmpeg) and play via `aplay`
+- `TX_FETCH_ATTEMPTS` / `TX_FETCH_DELAY_MS` retries for fetching a transaction when the log notification arrives before the transaction is queryable
+
+- Memo detection:
+
+  - The listener subscribes to logs mentioning the fish wallet, then fetches the transaction and reads the memos from the instruction data with `getMemosFromInstructions` from `@solana-program/memo`. Program logs are not parsed, so memos from every memo program version (v1, v3 and the new v4) are picked up, including memos sent through a CPI.
 
 - Duration sync:
 

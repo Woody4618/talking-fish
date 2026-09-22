@@ -2,6 +2,7 @@
 
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo'
 import { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,7 +14,7 @@ import { WalletButton } from '@/components/solana/solana-provider'
 import QRCode from 'react-qr-code'
 
 const DEFAULT_ADDRESS = 'GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd'
-const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr')
+const MEMO_PROGRAM_ID = new PublicKey(MEMO_PROGRAM_ADDRESS)
 
 export default function MemoFeature() {
   const { connection } = useConnection()

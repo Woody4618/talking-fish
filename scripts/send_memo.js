@@ -2,6 +2,7 @@
 // Usage:
 // DEST=<recipient_pubkey> MEMO="Hello fish" node scripts/send_memo.js
 // Or: npm run send:memo
+// Sends via the v4 memo program; set MEMO_PROGRAM to use an older version.
 
 import fs from "fs";
 import os from "os";
@@ -15,11 +16,14 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
+import { MEMO_PROGRAM_ADDRESS } from "@solana-program/memo";
 
 const DEST = process.env.DEST || "GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd";
 const MEMO = process.env.MEMO || "Hello from talking Memo the solana reading fish ";
 const HTTP_ENDPOINT =
   process.env.SOLANA_HTTP || "https://api.devnet.solana.com";
+// Defaults to the current (v4) memo program; the listener reads every version
+const MEMO_PROGRAM = process.env.MEMO_PROGRAM || MEMO_PROGRAM_ADDRESS;
 
 function loadKeypairFromFile(filePath) {
   const secret = JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -54,6 +58,7 @@ async function main() {
   const connection = new Connection(HTTP_ENDPOINT, "confirmed");
   const payer = loadDefaultKeypair();
   console.log("Using payer:", payer.publicKey.toBase58());
+  console.log("Memo program:", MEMO_PROGRAM);
   await ensureAirdropIfDevnet(connection, payer.publicKey);
 
   const ixTransfer = SystemProgram.transfer({
@@ -62,9 +67,7 @@ async function main() {
     lamports: 10_000, // 0.00001 SOL
   });
 
-  const memoProgramId = new PublicKey(
-    "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
-  );
+  const memoProgramId = new PublicKey(MEMO_PROGRAM);
   const ixMemo = new TransactionInstruction({
     keys: [{ pubkey: payer.publicKey, isSigner: true, isWritable: false }],
     programId: memoProgramId,

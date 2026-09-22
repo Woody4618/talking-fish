@@ -8,6 +8,7 @@ import {
   clusterApiUrl,
   LAMPORTS_PER_SOL,
 } from '@solana/web3.js'
+import { MEMO_PROGRAM_ADDRESS } from '@solana-program/memo'
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
       tx.add(
         new TransactionInstruction({
           keys: [{ pubkey: feePayer, isSigner: true, isWritable: true }],
-          programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+          programId: new PublicKey(MEMO_PROGRAM_ADDRESS),
           data: Buffer.from(memoText, 'utf8'),
         }),
       )
